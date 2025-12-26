@@ -1,0 +1,12 @@
+﻿Maquinas;Nivel;Função
+Tratores;1;Produtividade
+Reboque;1;Velocidade
+Pulverizador;2;Produtividade
+Armazém;2;Armazenagem
+Arado;3;Produtividade
+Silo;3;Armazenagem
+Plantadeira;4;Produtividade
+Colheitadeiras;4;Velocidade
+Drones;5;Produtividade
+Ordenhadeira;5;Produtividade
+Irrigadores;5;Produtividade

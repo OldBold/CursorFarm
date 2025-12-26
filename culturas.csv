@@ -1,0 +1,26 @@
+﻿Tipo;NomePlanta;Nivel;TempoColheita1;TempColheita2;ValorBaseKg;KgAnoHectar;Solo;Clima
+Cereais;Trigo;1;5;5;9; 1.000 ;Arenoso;Ameno/Equilibrado
+Leguminosas;Soja;1;5;5;9; 1.000 ;Argiloso;Ameno/Equilibrado
+Leguminosas;Feijão;1;3;3;9; 1.000 ;Arenoso;Quente/Chuvoso
+Cereais;Arroz;1;5;5;9; 1.000 ;Alagado;Ameno/Equilibrado
+Cereais;Milho;1;5;5;9; 1.000 ;Arenoso;Ameno/Equilibrado
+Frutas;Tomate;2;4;4;16; 600 ;Arenoso;Ameno/Equilibrado
+Frutas;Banana;2;10;2;16; 600 ;Arenoso;Ameno/Equilibrado
+Frutas;Café;2;10;10;16; 600 ;Argiloso;Ameno/Equilibrado
+Raizes;Batata;2;4;4;16; 600 ;Arenoso;Quente/Chuvoso
+Raizes;Cebola;2;5;5;16; 600 ;Arenoso;Ameno/Chuvoso
+Frutas;Laranja;3;7;3;24; 500 ;Arenoso;Ameno/Equilibrado
+Frutas;Uva;3;6;6;24; 500 ;Pedregoso;Quente/Equilibrado
+Leguminosas;Amendoim;3;5;5;24; 500 ;Arenoso;Ameno/Equilibrado
+Frutas;Maça;3;7;7;24; 500 ;Argiloso;Frio/Equilibrado
+Frutas;Limão;3;7;3;24; 500 ;Arenoso;Quente/Seco
+Frutas;Morango;4;3;3;40; 350 ;Arenoso;Ameno/Equilibrado
+Cereais;Cevada;4;5;5;40; 350 ;Arenoso;Ameno/Equilibrado
+Cereais;Aveia;4;5;5;40; 350 ;Argiloso;Ameno/Chuvoso
+Raizes;Cenoura;4;4;4;40; 350 ;Arenoso;Ameno/Equilibrado
+Raizes;Beterraba;4;4;4;40; 350 ;Arenoso;Ameno/Equilibrado
+Frutas;Cacau;5;20;5;105; 180 ;Argiloso;Quente/Chuvoso
+Frutas;Azeitona;5;30;12;105; 180 ;Pedregoso;Ameno/Seco
+Cereais;Cana de Açucar;5;15;15;105; 180 ;Argiloso;Quente/Equilibrado
+Leguminosas;Ervilha;5;3;3;105; 180 ;Argiloso;Frio/Equilibrado
+Arbustos;Algodão;5;9;9;105; 180 ;Arenoso;Quente/Chuvoso

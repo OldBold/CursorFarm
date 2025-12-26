@@ -1,0 +1,8 @@
+# Refactor Safe Rules
+
+- NÃO alterar comportamento observável do jogo.
+- NÃO alterar textos, labels, ícones, layout, fluxos de telas ou UX.
+- NÃO renomear variáveis exibidas ao usuário.
+- NÃO mudar regras de jogo, apenas mover código.
+- Refatorar em passos pequenos e revisáveis.
+- Ao final de cada passo, o jogo deve rodar exatamente como antes.
