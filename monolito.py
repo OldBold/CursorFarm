@@ -436,6 +436,9 @@ class JogoFazenda:
         self.tab_financas = tk.Frame(self.notebook)
         self.notebook.add(self.tab_financas, text="  💰 Finanças  ")
         self.montar_aba_financas()
+        self.tab_stats = tk.Frame(self.notebook)
+        self.notebook.add(self.tab_stats, text="  📊 Estatísticas  ")
+        self.montar_aba_estatisticas()
         
         self.txt_log = tk.Text(self.root, height=5, bg="#f0f0f0", state="disabled")
         self.txt_log.pack(fill="x", padx=10, pady=(0,10))
@@ -1576,6 +1579,12 @@ class JogoFazenda:
             }
             self.estoque.append(novo_lote_estoque)
             self.log(f"{total_kg_colhido:,.0f} kg de {nome_cultura} foram armazenados no {tipo_armazenagem}.")
+            # atualizar estatísticas: colheita registrada
+            try:
+                from systems.stats import record_harvested
+                record_harvested(self.__dict__, nome_cultura, total_kg_colhido)
+            except Exception:
+                pass
 
         elif acao == "vender":
             multiplicador_mercado = self.mercado_multiplicadores.get(nome_cultura, 1.0)
@@ -1597,6 +1606,14 @@ class JogoFazenda:
             self.dinheiro += receita_total
             self.ganhar_xp(receita_total / 150) # XP por vender
             self.log(f"Colheita vendida em '{nome_exibido}': receita base {formatar_moeda(receita_base)}, Bônus Equipamentos {formatar_moeda(receita_bonus)}, total {formatar_moeda(receita_total)}.")
+            # atualizar estatísticas: colheita e venda
+            try:
+                from systems.stats import record_harvested, record_sold
+                # registrar que foi colhido e vendido
+                record_harvested(self.__dict__, nome_cultura, total_kg_colhido)
+                record_sold(self.__dict__, nome_cultura, total_kg_colhido, receita_total)
+            except Exception:
+                pass
 
         # Remove as plantações colhidas da fazenda
         for i in sorted(indices_para_remover, reverse=True):
@@ -1790,6 +1807,21 @@ class JogoFazenda:
         state = avancar_semana(state, dias_avancados)
         
         # Escrever campos de volta em self
+        # Sincronizar estatísticas e conquistas geradas pela engine de tempo
+        if "campaign_stats" in state:
+            self.campaign_stats = state["campaign_stats"]
+        if "unlocked_achievements" in state:
+            self.unlocked_achievements = state["unlocked_achievements"]
+        # Se a campanha foi perdida, garantir notificação UI imediata (apenas uma vez).
+        camp = state.get("campaign", {})
+        if camp.get("status") == "LOST":
+            eventos_tmp = state.get("eventos", [])
+            # Evitar dupla notificação se o evento GAME OVER já estiver nas mensagens
+            if not any(str(e).startswith("GAME OVER") for e in eventos_tmp):
+                self.log(f"GAME OVER: {camp.get('lost_reason', 'Derrota na campanha.')}")
+            # Marcar localmente que já notificamos a UI para evitar repetir
+            setattr(self, "_game_over_notified", True)
+
         self.dia = state["dia"]
         self.clima = state["clima"]
         self.dinheiro = state["dinheiro"]
@@ -1912,6 +1944,38 @@ class JogoFazenda:
         self.atualizar_aba_mercado()
         self.atualizar_aba_logistica()
         self.atualizar_aba_financas()
+        self.atualizar_aba_estatisticas()
+
+    def montar_aba_estatisticas(self):
+        frame = self.tab_stats
+        lf = tk.LabelFrame(frame, text="Estatísticas da Campanha", padx=10, pady=10)
+        lf.pack(fill="both", expand=True, padx=5, pady=5)
+
+        self.txt_stats = tk.Text(lf, height=15, state="disabled", bg="#ffffff")
+        self.txt_stats.pack(fill="both", expand=True)
+
+    def atualizar_aba_estatisticas(self):
+        # Ler stats do state (self.__dict__ já é compatível)
+        stats = self.__dict__.get("campaign_stats") or {}
+        lines = []
+        lines.append(f"Lucro acumulado: {stats.get('net_profit', 0.0):,.2f}")
+        lines.append(f"Receita total: {stats.get('total_revenue', 0.0):,.2f}")
+        lines.append(f"Custos totais: {stats.get('total_costs', 0.0):,.2f}")
+        lines.append("")
+        lines.append(f"Semanas no azul: {stats.get('weeks_positive_cash', 0)}")
+        lines.append(f"Semanas no vermelho: {stats.get('weeks_negative_cash', 0)}")
+        lines.append("")
+        # Top 3 culturas por produção
+        harvested = stats.get('total_harvested_by_culture', {}) or {}
+        sorted_h = sorted(harvested.items(), key=lambda x: x[1], reverse=True)
+        lines.append("Top culturas por produção (kg):")
+        for nome, val in sorted_h[:3]:
+            lines.append(f" - {nome}: {val:,.0f} kg")
+
+        self.txt_stats.config(state="normal")
+        self.txt_stats.delete("1.0", "end")
+        self.txt_stats.insert("1.0", "\n".join(lines))
+        self.txt_stats.config(state="disabled")
         
         # --- ATUALIZAÇÃO DAS ABAS DE FAZENDA ---
         if self.notebook_fazendas:

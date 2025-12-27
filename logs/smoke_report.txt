@@ -1,46 +1,46 @@
 SMOKE DEFAULT REPORT
-started: 2025-12-27T14:55:29.697734
+started: 2025-12-27T15:23:51.759909
 weeks: 52
 seed: 123
 project_root: C:\Users\hvero\CursorFarm
 
 --- TRACE (last 25) ---
 W028 | semana=028 | dinheiro=44400.0 | clima=Nublado | prontas=1
-W029 | semana=029 | dinheiro=44200.0 | clima=Seca Extrema | prontas=1
-W030 | semana=030 | dinheiro=44000.0 | clima=Nublado | prontas=1
-W031 | semana=031 | dinheiro=43800.0 | clima=Chuva | prontas=1
+W029 | semana=029 | dinheiro=44200.0 | clima=Sol | prontas=1
+W030 | semana=030 | dinheiro=44000.0 | clima=Seca Extrema | prontas=1
+W031 | semana=031 | dinheiro=43800.0 | clima=Sol | prontas=1
 W032 | semana=032 | dinheiro=43600.0 | clima=Chuva | prontas=1
-W033 | semana=033 | dinheiro=43400.0 | clima=Sol | prontas=1
-W034 | semana=034 | dinheiro=43200.0 | clima=Sol | prontas=1
+W033 | semana=033 | dinheiro=43400.0 | clima=Seca Extrema | prontas=1
+W034 | semana=034 | dinheiro=43200.0 | clima=Chuva | prontas=1
 W035 | semana=035 | dinheiro=43000.0 | clima=Sol | prontas=1
 W036 | semana=036 | dinheiro=42800.0 | clima=Chuva | prontas=1
-W037 | semana=037 | dinheiro=42600.0 | clima=Seca Extrema | prontas=1
-W038 | semana=038 | dinheiro=42400.0 | clima=Sol | prontas=1
-W039 | semana=039 | dinheiro=42200.0 | clima=Chuva | prontas=1
+W037 | semana=037 | dinheiro=42600.0 | clima=Sol | prontas=1
+W038 | semana=038 | dinheiro=42400.0 | clima=Seca Extrema | prontas=1
+W039 | semana=039 | dinheiro=42200.0 | clima=Sol | prontas=1
 W040 | semana=040 | dinheiro=42000.0 | clima=Sol | prontas=1
-W041 | semana=041 | dinheiro=41800.0 | clima=Sol | prontas=1
-W042 | semana=042 | dinheiro=41600.0 | clima=Chuva | prontas=1
+W041 | semana=041 | dinheiro=41800.0 | clima=Nublado | prontas=1
+W042 | semana=042 | dinheiro=41600.0 | clima=Sol | prontas=1
 W043 | semana=043 | dinheiro=41400.0 | clima=Nublado | prontas=1
-W044 | semana=044 | dinheiro=41200.0 | clima=Nublado | prontas=1
-W045 | semana=045 | dinheiro=41000.0 | clima=Nublado | prontas=1
-W046 | semana=046 | dinheiro=40800.0 | clima=Chuva | prontas=1
-W047 | semana=047 | dinheiro=40600.0 | clima=Chuva | prontas=1
+W044 | semana=044 | dinheiro=41200.0 | clima=Sol | prontas=1
+W045 | semana=045 | dinheiro=41000.0 | clima=Sol | prontas=1
+W046 | semana=046 | dinheiro=40800.0 | clima=Seca Extrema | prontas=1
+W047 | semana=047 | dinheiro=40600.0 | clima=Sol | prontas=1
 W048 | semana=048 | dinheiro=40400.0 | clima=Chuva | prontas=1
-W049 | semana=049 | dinheiro=40200.0 | clima=Sol | prontas=1
-W050 | semana=050 | dinheiro=40000.0 | clima=Nublado | prontas=1
-W051 | semana=051 | dinheiro=39800.0 | clima=Nublado | prontas=1
-W052 | semana=052 | dinheiro=39600.0 | clima=Chuva | prontas=1
+W049 | semana=049 | dinheiro=40200.0 | clima=Nublado | prontas=1
+W050 | semana=050 | dinheiro=40000.0 | clima=Chuva | prontas=1
+W051 | semana=051 | dinheiro=39800.0 | clima=Chuva | prontas=1
+W052 | semana=052 | dinheiro=39600.0 | clima=Nublado | prontas=1
 
 --- WARNINGS ---
 none
 
 --- FINAL STATE (keys) ---
-_smoke_rng_sample, alertas, clima, dia, dinheiro, emprestimos_ativos, eventos, fazendas, mercado_multiplicadores, meus_equipamentos, nivel, opcoes_base_fazenda, plantacoes_por_fazenda, propriedades_a_venda, rng_seed, salarios_gerente, seguro_agricola_ativo, tipos_de_solo
+_smoke_rng_sample, alertas, campaign, clima, dia, dinheiro, emprestimos_ativos, eventos, fazendas, mercado_multiplicadores, meus_equipamentos, nivel, opcoes_base_fazenda, plantacoes_por_fazenda, propriedades_a_venda, rng_seed, salarios_gerente, seguro_agricola_ativo, tipos_de_solo, weeks_negative_cash_consecutive, weeks_played
 
 --- FINAL STATE (subset) ---
 {
   "dia": 365,
   "nivel": 1,
   "dinheiro": 39600.0,
-  "clima": "Chuva"
+  "clima": "Nublado"
 }
