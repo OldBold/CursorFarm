@@ -70,7 +70,8 @@ def colheita_lotes(plantacao_alvo, indices_prontas, bonus_prod):
                 lotes_a_colher.append({
                     "dados_base": p["dados_base"],
                     "quantidade_kg": kg_produzido,
-                    "custo_producao_por_kg": custo_por_kg
+                    "custo_producao_por_kg": custo_por_kg,
+                    "compativel": p.get("compativel", True)
                 })
                 indices_para_remover.append(idx)
     

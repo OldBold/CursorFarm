@@ -1,6 +1,58 @@
 import random
 
 
+def gerar_propriedades_iniciais(dia, opcoes_base_fazenda, tipos_de_solo, rng=None):
+    """
+    Gera lista de propriedades iniciais para escolha do jogador.
+    - Apenas pequenas (Sítio) e médias (Fazenda), excluindo Latifúndio
+    - Cada tipo de solo aparece pelo menos uma vez
+    - Retorna exatamente 4 propriedades (uma para cada tipo de solo)
+    """
+    if rng is None:
+        rng = random
+    
+    # Filtrar apenas Sítio (tam=10) e Fazenda (tam=20)
+    opcoes_filtradas = [op for op in opcoes_base_fazenda if op["tam"] in [10, 20]]
+    
+    propriedades = []
+    
+    # Garantir que cada tipo de solo apareça pelo menos uma vez
+    solos_embaralhados = tipos_de_solo.copy()
+    rng.shuffle(solos_embaralhados)
+    
+    for i, solo in enumerate(solos_embaralhados):
+        # Para as primeiras propriedades, garantir um de cada solo
+        # Depois, escolher aleatoriamente entre Sítio e Fazenda
+        base = rng.choice(opcoes_filtradas)
+        
+        # Lógica de custo
+        custo_final = base["custo_base"]
+        if solo == "Alagado":
+            custo_final *= 0.90
+        elif solo == "Pedregoso":
+            custo_final *= 0.80
+        
+        propriedades.append({
+            "id": f"prop_inicial_{dia}_{i}",
+            "nome": f"{base['tipo']} {solo}",
+            "tam": base["tam"],
+            "solo": solo,
+            "custo": int(custo_final)
+        })
+    
+    # Garante que não haja nomes duplicados
+    nomes_vistos = set()
+    for prop in propriedades:
+        nome_original = prop["nome"]
+        contador = 2
+        while prop["nome"] in nomes_vistos:
+            prop["nome"] = f"{nome_original} {contador}"
+            contador += 1
+        nomes_vistos.add(prop["nome"])
+    
+    return propriedades
+
+
 def gerar_propriedades_a_venda(dia, opcoes_base_fazenda, tipos_de_solo, rng=None):
     """
     Gera lista de propriedades à venda.

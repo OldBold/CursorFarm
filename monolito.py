@@ -1,16 +1,14 @@
 import tkinter as tk
 from tkinter import messagebox, ttk, simpledialog
-import csv
 import os
 import random
-from utils import converter_valor_br
-from data_loader import ler_csv_generico
+from utils import converter_valor_br, formatar_moeda
 from systems.market import atualizar_multiplicadores
 from systems.economy import preco_mercado_atual, margem_percentual, producao_kg, custo_medio_por_kg
 from systems.time_engine import avancar_semana
 from systems.storage import calcular_capacidade_armazenagem, calcular_uso_capacidade, calcular_espaco_livre, processar_venda_automatica
 from systems.agriculture import validar_plantio, criar_plantacoes, colheita_lotes, agrupar_colheita
-from systems.properties import gerar_propriedades_a_venda, preco_venda_propriedade, pode_vender_fazenda, pode_comprar_propriedade
+from systems.properties import gerar_propriedades_a_venda, gerar_propriedades_iniciais, preco_venda_propriedade, pode_vender_fazenda, pode_comprar_propriedade
 from systems.manager import salario_gerente, deve_pagar_salario, processar_pagamento_salario, selecionar_culturas_disponiveis, escolher_cultura_para_plantar
 from systems.finance import processar_emprestimos_semanal, calcular_semanas_restantes, calcular_valor_pagamento_max, processar_pagamento
 
@@ -38,19 +36,13 @@ class JogoFazenda:
         self.emprestimos_ativos = []
         self.seguro_agricola_ativo = False
         
-        self.tipos_de_solo = ["Arenoso", "Argiloso", "Alagado", "Pedregoso"]
-        
-        self.opcoes_base_fazenda = [
-            {"tipo": "Sítio", "tam": 10, "custo_base": 20000},
-            {"tipo": "Fazenda", "tam": 20, "custo_base": 30000},
-            {"tipo": "Latifúndio", "tam": 50, "custo_base": 50000},
-        ]
+        # Tipos de solo e opções de fazenda são centralizados em data.catalogs
+        from data.catalogs import TIPOS_DE_SOLO, OPCOES_BASE_FAZENDA, SALARIOS_GERENTE
+        from copy import deepcopy
 
-        self.salarios_gerente = {
-            10: 4000,
-            20: 7000,
-            50: 12000,
-        }
+        self.tipos_de_solo = deepcopy(TIPOS_DE_SOLO)
+        self.opcoes_base_fazenda = deepcopy(OPCOES_BASE_FAZENDA)
+        self.salarios_gerente = deepcopy(SALARIOS_GERENTE)
         
         # --- CONTROLE DE TEMPO (NOVO) ---
         self.velocidade_atual = 0  # 0 = Pausa
@@ -127,6 +119,81 @@ class JogoFazenda:
         self.style.configure("TLabelframe", font=self.ui_fonts['font_subtitulo'])
         self.style.configure("TLabelframe.Label", font=self.ui_fonts['font_subtitulo'])
 
+    def _configurar_ordenacao_treeview(self, tree, colunas_numericas=None):
+        """
+        Configura ordenação por coluna em uma Treeview.
+        colunas_numericas: lista de nomes de colunas que devem ser ordenadas numericamente.
+        """
+        if colunas_numericas is None:
+            colunas_numericas = []
+        
+        def _ordenar_coluna(tree, col, reverse):
+            items = [(tree.set(item, col), item) for item in tree.get_children('')]
+            
+            # Tenta converter para número se a coluna estiver na lista de numéricas
+            try:
+                if col in colunas_numericas:
+                    items.sort(key=lambda t: float(t[0].replace('$', '').replace('.', '').replace(',', '.').replace('%', '').strip() or 0), reverse=reverse)
+                else:
+                    items.sort(key=lambda t: t[0].lower(), reverse=reverse)
+            except (ValueError, AttributeError):
+                items.sort(key=lambda t: str(t[0]).lower(), reverse=reverse)
+            
+            for index, (val, item) in enumerate(items):
+                tree.move(item, '', index)
+            
+            # Inverte a ordem na próxima vez
+            tree.heading(col, command=lambda: _ordenar_coluna(tree, col, not reverse))
+        
+        # Configura o comando de ordenação para cada coluna
+        for col in tree['columns']:
+            tree.heading(col, command=lambda c=col: _ordenar_coluna(tree, c, False))
+    
+    def _aplicar_filtro_treeview(self, tree, texto_filtro):
+        """
+        Filtra itens de uma Treeview baseado em texto (mostra apenas itens que correspondem).
+        """
+        texto_filtro = texto_filtro.lower().strip()
+        
+        # Coleta todos os itens antes de fazer qualquer mudança
+        todos_itens = list(tree.get_children())
+        
+        if not texto_filtro:
+            # Mostra todos os itens reatachando-os
+            for item in todos_itens:
+                if tree.exists(item):
+                    try:
+                        tree.detach(item)
+                        tree.reattach(item, '', 'end')
+                    except:
+                        pass
+        else:
+            # Separa itens que correspondem
+            itens_visiveis = []
+            
+            for item in todos_itens:
+                if not tree.exists(item):
+                    continue
+                valores = [tree.set(item, col) for col in tree['columns']]
+                texto_completo = ' '.join(str(v) for v in valores).lower()
+                
+                if texto_filtro in texto_completo:
+                    itens_visiveis.append(item)
+                else:
+                    # Oculta o item
+                    try:
+                        tree.detach(item)
+                    except:
+                        pass
+            
+            # Reatacha apenas os itens visíveis na ordem original
+            for item in itens_visiveis:
+                try:
+                    tree.detach(item)
+                    tree.reattach(item, '', 'end')
+                except:
+                    pass
+
     def gerar_novas_propriedades_a_venda(self, logar_evento=False):
         self.propriedades_a_venda = gerar_propriedades_a_venda(self.dia, self.opcoes_base_fazenda, self.tipos_de_solo)
         
@@ -137,102 +204,21 @@ class JogoFazenda:
     # CARREGAMENTO DE DADOS
     # ------------------------------------------------------------------
     def carregar_culturas(self):
-        FATOR_RECEITA_POR_DIA = 50 
-        BONUS_DIARIO_POR_RISCO = 0.001
-        DIAS_BASE_RISCO = 30
+        # Carrega catálogo de culturas a partir do módulo de catálogos (substitui CSV)
+        from data.catalogs import CULTURAS_CATALOGO
+        from copy import deepcopy
 
-        linhas = ler_csv_generico("culturas.csv")
-        for linha in linhas:
-            nome = linha.get("NomePlanta", "").strip()
-            if nome:
-                kg = converter_valor_br(linha.get("KgAnoHectar", 0))
-                if kg == 0: continue
-
-                meses = converter_valor_br(linha.get("TempoColheita1", 1))
-                dias_totais = meses * 30
-                if dias_totais == 0: continue
-
-                fator_bonus_risco = 0
-                if dias_totais > DIAS_BASE_RISCO:
-                    dias_excedentes = dias_totais - DIAS_BASE_RISCO
-                    fator_bonus_risco = dias_excedentes * BONUS_DIARIO_POR_RISCO
-
-                fator_receita_ajustado = FATOR_RECEITA_POR_DIA * (1 + fator_bonus_risco)
-                receita_total_esperada = dias_totais * fator_receita_ajustado
-                preco_venda_calculado = receita_total_esperada / kg
-                custo = max(100, receita_total_esperada * 0.50)
-
-                tipo_cultura = linha.get("Tipo", "").strip()
-                if tipo_cultura in ["Cereais", "Leguminosas"]:
-                    tipo_armazenagem = "Silo"
-                else:
-                    tipo_armazenagem = "Armazém"
-                
-                self.culturas_catalogo.append({
-                    "nome": nome,
-                    "preco_venda": preco_venda_calculado,
-                    "kg_hectare": kg,
-                    "dias_totais": dias_totais,
-                    "solo_ideal": linha.get("Solo", "Qualquer").strip(),
-                    "nivel_req": int(linha.get("Nivel", 1)),
-                    "custo_semente": custo,
-                    "tipo_armazenagem": tipo_armazenagem, # NOVO
-                    "tipo_cultura": tipo_cultura # NOVO
-                })
-
+        self.culturas_catalogo = deepcopy(CULTURAS_CATALOGO)
         for cultura in self.culturas_catalogo:
             self.mercado_multiplicadores[cultura["nome"]] = 1.0
 
 
     def carregar_maquinas(self):
-        linhas = ler_csv_generico("Implementos.csv")
-        tiers = [
-            {"sufixo": "Padrão", "mult_preco": 1.0, "bonus": 0.10, "taxa_manut": 0.010, "capacidade": 1000 * 1000},
-            {"sufixo": "Pro",    "mult_preco": 2.5, "bonus": 0.35, "taxa_manut": 0.005, "capacidade": 3000 * 1000},
-            {"sufixo": "Ultra",  "mult_preco": 5.0, "bonus": 0.80, "taxa_manut": 0.002, "capacidade": 8000 * 1000}
-        ]
-        
-        for linha in linhas:
-            nome_base = "Desconhecido"
-            for k in linha.keys():
-                if "maquinas" in k.lower() or "máquinas" in k.lower():
-                    nome_base = linha[k].strip()
-                    break
-            if nome_base == "Desconhecido": continue
+        # Carrega catálogo de máquinas a partir do módulo de catálogos (substitui CSV)
+        from data.catalogs import MAQUINAS_CATALOGO
+        from copy import deepcopy
 
-            funcao = "Produtividade"
-            for k in linha.keys():
-                if "função" in k.lower() or "funcao" in k.lower():
-                    funcao = linha[k].strip()
-                    break
-
-            try: nivel_base = int(linha.get("Nivel", 1))
-            except: nivel_base = 1
-            
-            preco_base_ref = 4000 * nivel_base
-            
-            for i, tier in enumerate(tiers):
-                nome_final = f"{nome_base} {tier['sufixo']}"
-                preco_final = preco_base_ref * tier['mult_preco']
-                manutencao_diaria = preco_final * tier['taxa_manut']
-                
-                maq_data = {
-                    "nome": nome_final,
-                    "funcao": funcao,
-                    "preco": preco_final,
-                    "manutencao": manutencao_diaria,
-                    "nivel_req": nivel_base + i,
-                    "nome_base": nome_base # Adicionado para facilitar a lógica
-                }
-
-                if funcao == "Armazenagem":
-                    maq_data["valor_bonus"] = 0
-                    maq_data["capacidade"] = tier["capacidade"]
-                else:
-                    maq_data["valor_bonus"] = tier['bonus']
-                    maq_data["capacidade"] = 0
-
-                self.maquinas_catalogo.append(maq_data)
+        self.maquinas_catalogo = deepcopy(MAQUINAS_CATALOGO)
 
     def atualizar_capacidade_armazenagem(self):
         self.capacidade_armazenagem = calcular_capacidade_armazenagem(self.meus_equipamentos)
@@ -269,9 +255,12 @@ class JogoFazenda:
         frame_propriedades = tk.LabelFrame(main_frame, text="1. Escolha a Propriedade", font=self.ui_fonts['font_subtitulo'])
         frame_propriedades.pack(side="left", fill="both", expand=True, padx=(0, 5))
         
-        for op in self.propriedades_a_venda:
+        # Gerar propriedades iniciais (apenas pequenas e médias, todos os solos)
+        self.propriedades_iniciais = gerar_propriedades_iniciais(self.dia, self.opcoes_base_fazenda, self.tipos_de_solo)
+        
+        for op in self.propriedades_iniciais:
             rb = tk.Radiobutton(frame_propriedades, 
-                                text=f"{op['nome']} - R$ {op['custo']:,}\n({op['tam']} ha, solo {op['solo']})",
+                                text=f"{op['nome']} - {formatar_moeda(op['custo'], 0)}\n({op['tam']} ha, solo {op['solo']})",
                                 variable=self.propriedade_selecionada_var,
                                 value=op['nome'],
                                 command=self._atualizar_custo_inicial,
@@ -287,7 +276,7 @@ class JogoFazenda:
         for maq in maquinas_nivel_1:
             var = tk.BooleanVar()
             chk = tk.Checkbutton(frame_equipamentos, 
-                                 text=f"{maq['nome']} (R$ {maq['preco']:,.0f})", 
+                                 text=f"{maq['nome']} ({formatar_moeda(maq['preco'], 0)})", 
                                  variable=var, 
                                  font=self.ui_fonts['font_corpo'],
                                  command=self._atualizar_custo_inicial)
@@ -306,7 +295,7 @@ class JogoFazenda:
         custo_propriedade = 0
         nome_propriedade = self.propriedade_selecionada_var.get()
         if nome_propriedade != "None":
-            propriedade = next((p for p in self.propriedades_a_venda if p['nome'] == nome_propriedade), None)
+            propriedade = next((p for p in self.propriedades_iniciais if p['nome'] == nome_propriedade), None)
             if propriedade:
                 custo_propriedade = propriedade['custo']
 
@@ -314,19 +303,40 @@ class JogoFazenda:
         saldo = self.dinheiro_inicial_base - custo_total
         
         self.lbl_dinheiro_inicial.config(
-            text=f"Capital: R$ {self.dinheiro_inicial_base:,.2f} | Custo Total: R$ {custo_total:,.2f} | Saldo Restante: R$ {saldo:,.2f}"
+            text=f"Capital: {formatar_moeda(self.dinheiro_inicial_base)} | Custo Total: {formatar_moeda(custo_total)} | Saldo Restante: {formatar_moeda(saldo)}"
         )
 
     def confirmar_e_iniciar(self):
         nome_propriedade = self.propriedade_selecionada_var.get()
         if nome_propriedade == "None":
-            messagebox.showwarning("Seleção Incompleta", "Por favor, escolha uma propriedade para começar.")
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Seleção Incompleta", "Por favor, escolha uma propriedade para começar.")
             return
             
-        fazenda_selecionada = next((p for p in self.propriedades_a_venda if p['nome'] == nome_propriedade), None)
+        fazenda_selecionada = next((p for p in self.propriedades_iniciais if p['nome'] == nome_propriedade), None)
         if not fazenda_selecionada:
             return
 
+        # Verificar compatibilidade do solo com culturas nível 1
+        solo_escolhido = fazenda_selecionada["solo"]
+        culturas_nivel_1 = [c for c in self.culturas_catalogo if c["nivel_req"] == 1]
+        solos_compatíveis_nivel_1 = set()
+        
+        for cultura in culturas_nivel_1:
+            solo_ideal = cultura.get("solo_ideal", "Qualquer")
+            if solo_ideal != "Qualquer":
+                solos_compatíveis_nivel_1.add(solo_ideal)
+        
+        if solo_escolhido not in solos_compatíveis_nivel_1:
+            # Solo incompatível - avisar e permitir refazer escolha
+            solos_compatíveis_str = ", ".join(sorted(solos_compatíveis_nivel_1))
+            msg = f"Atenção: O solo '{solo_escolhido}' não é compatível com nenhuma cultura de nível 1.\n\n"
+            msg += f"Solos compatíveis com culturas nível 1: {solos_compatíveis_str}.\n\n"
+            msg += "Você terá mais dificuldade no início do jogo.\n\n"
+            msg += "Deseja refazer sua escolha?"
+            
+            if self._pausar_e_exibir_dialogo(messagebox.askyesno, "Solo Incompatível", msg, icon="warning"):
+                return  # Retorna para permitir nova escolha
+        
         fazenda_inicial = fazenda_selecionada.copy()
         
         # --- NOMEAÇÃO ---
@@ -355,7 +365,7 @@ class JogoFazenda:
         self.dinheiro = 75000 - custo_total
         
         if self.dinheiro < 0:
-            messagebox.showerror("Investimento Excedido", "Capital insuficiente.")
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Investimento Excedido", "Capital insuficiente.")
             self.mostrar_tela_imobiliaria()
             return
 
@@ -371,7 +381,7 @@ class JogoFazenda:
         frame_topo.pack(fill="x")
         self.lbl_nivel = tk.Label(frame_topo, text=f"⭐ Nível {self.nivel}", font=self.ui_fonts['font_subtitulo'], bg="#333", fg="gold")
         self.lbl_nivel.pack(side="left", padx=15)
-        self.lbl_dinheiro = tk.Label(frame_topo, text=f"R$ {self.dinheiro:,.2f}", font=self.ui_fonts['font_subtitulo'], bg="#333", fg="#90EE90")
+        self.lbl_dinheiro = tk.Label(frame_topo, text=formatar_moeda(self.dinheiro), font=self.ui_fonts['font_subtitulo'], bg="#333", fg="#90EE90")
         self.lbl_dinheiro.pack(side="left", padx=15)
 
         # --- CONTROLE DE TEMPO ---
@@ -500,14 +510,14 @@ class JogoFazenda:
         lf_agro.pack(fill="x", pady=5)
         
         desc_agro = "Juros: 2% ao mês (0.5% por semana)\n" \
-                    f"Limite: R$ {limite_agro:,.2f} (50% do valor de suas fazendas)\n" \
+                    f"Limite: {formatar_moeda(limite_agro)} (50% do valor de suas fazendas)\n" \
                     "Garantia: Uma de suas fazendas (aleatória)\n" \
                     "Prazo para quitar: 12 semanas"
         tk.Label(lf_agro, text=desc_agro, font=self.ui_fonts['font_corpo'], justify="left").pack(anchor="w")
 
         frame_input_agro = tk.Frame(lf_agro)
         frame_input_agro.pack(fill="x", pady=5)
-        tk.Label(frame_input_agro, text="Valor: R$", font=self.ui_fonts['font_corpo']).pack(side="left")
+        tk.Label(frame_input_agro, text="Valor: $", font=self.ui_fonts['font_corpo']).pack(side="left")
         entry_agro = tk.Entry(frame_input_agro, font=self.ui_fonts['font_corpo'])
         entry_agro.pack(side="left", fill="x", expand=True)
         
@@ -523,14 +533,14 @@ class JogoFazenda:
         lf_popular.pack(fill="x", pady=5)
 
         desc_popular = "Juros: 5% ao mês (1.25% por semana)\n" \
-                       f"Limite: R$ {limite_popular:,.2f} (fixo)\n" \
+                       f"Limite: {formatar_moeda(limite_popular)} (fixo)\n" \
                        "Garantia: Nenhuma (afeta reputação se não pago)\n" \
                        "Prazo para quitar: 24 semanas"
         tk.Label(lf_popular, text=desc_popular, font=self.ui_fonts['font_corpo'], justify="left").pack(anchor="w")
 
         frame_input_popular = tk.Frame(lf_popular)
         frame_input_popular.pack(fill="x", pady=5)
-        tk.Label(frame_input_popular, text="Valor: R$", font=self.ui_fonts['font_corpo']).pack(side="left")
+        tk.Label(frame_input_popular, text="Valor: $", font=self.ui_fonts['font_corpo']).pack(side="left")
         entry_popular = tk.Entry(frame_input_popular, font=self.ui_fonts['font_corpo'])
         entry_popular.pack(side="left", fill="x", expand=True)
         btn_popular = tk.Button(frame_input_popular, text="Pegar", font=self.ui_fonts['font_botao'], command=lambda e=entry_popular: self._pegar_emprestimo(
@@ -546,14 +556,14 @@ class JogoFazenda:
         lf_fintech.pack(fill="x", pady=5)
         
         desc_fintech = "Juros: 12% ao mês (3% por semana)\n" \
-                       f"Limite: R$ {limite_fintech:,.2f} (80% do valor de suas máquinas)\n" \
+                       f"Limite: {formatar_moeda(limite_fintech)} (80% do valor de suas máquinas)\n" \
                        "Garantia: Todos os seus equipamentos\n" \
                        "Prazo para quitar: 12 semanas"
         tk.Label(lf_fintech, text=desc_fintech, font=self.ui_fonts['font_corpo'], justify="left").pack(anchor="w")
 
         frame_input_fintech = tk.Frame(lf_fintech)
         frame_input_fintech.pack(fill="x", pady=5)
-        tk.Label(frame_input_fintech, text="Valor: R$", font=self.ui_fonts['font_corpo']).pack(side="left")
+        tk.Label(frame_input_fintech, text="Valor: $", font=self.ui_fonts['font_corpo']).pack(side="left")
         entry_fintech = tk.Entry(frame_input_fintech, font=self.ui_fonts['font_corpo'])
         entry_fintech.pack(side="left", fill="x", expand=True)
         btn_fintech = tk.Button(frame_input_fintech, text="Pegar", font=self.ui_fonts['font_botao'], command=lambda e=entry_fintech: self._pegar_emprestimo(
@@ -566,15 +576,15 @@ class JogoFazenda:
         try:
             valor = float(valor_str)
         except (ValueError, TypeError):
-            messagebox.showerror("Valor Inválido", "Por favor, insira um número válido.", parent=window)
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Valor Inválido", "Por favor, insira um número válido.", parent=window)
             return
 
         if valor <= 0:
-            messagebox.showwarning("Valor Inválido", "O valor do empréstimo deve ser positivo.", parent=window)
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Valor Inválido", "O valor do empréstimo deve ser positivo.", parent=window)
             return
 
         if valor > limite:
-            messagebox.showwarning("Limite Excedido", f"O valor pedido excede seu limite de R$ {limite:,.2f} com o {banco}.", parent=window)
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Limite Excedido", f"O valor pedido excede seu limite de {formatar_moeda(limite)} com o {banco}.", parent=window)
             return
 
         garantia_data = None
@@ -582,7 +592,7 @@ class JogoFazenda:
         
         if tipo_garantia == "fazenda":
             if not self.fazendas:
-                messagebox.showerror("Sem Garantia", "Você não possui fazendas para usar como garantia no Banco Agro.", parent=window)
+                self._pausar_e_exibir_dialogo(messagebox.showerror, "Sem Garantia", "Você não possui fazendas para usar como garantia no Banco Agro.", parent=window)
                 return
             fazenda_garantia = random.choice(self.fazendas)
             garantia_data = {"tipo": "fazenda", "id": fazenda_garantia["id"]}
@@ -590,7 +600,7 @@ class JogoFazenda:
             
         elif tipo_garantia == "maquinas":
             if not self.meus_equipamentos:
-                messagebox.showerror("Sem Garantia", "Você não possui equipamentos para usar como garantia na Fintech Rural.", parent=window)
+                self._pausar_e_exibir_dialogo(messagebox.showerror, "Sem Garantia", "Você não possui equipamentos para usar como garantia na Fintech Rural.", parent=window)
                 return
             garantia_data = {"tipo": "maquinas"}
             garantia_desc = "Todos os Equipamentos"
@@ -613,28 +623,28 @@ class JogoFazenda:
         self.emprestimos_ativos.append(novo_emprestimo)
         self.dinheiro += valor
         
-        self.log(f"Pegou empréstimo de R$ {valor:,.2f} com {banco}. Garantia: {garantia_desc}.")
+        self.log(f"Pegou empréstimo de {formatar_moeda(valor)} com {banco}. Garantia: {garantia_desc}.")
         self.atualizar_ui_geral()
         window.destroy()
 
     def pagar_emprestimo(self):
         sel = self.tree_emprestimos.selection()
         if not sel:
-            messagebox.showwarning("Nenhuma Seleção", "Selecione um empréstimo na lista para pagar.")
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Nenhuma Seleção", "Selecione um empréstimo na lista para pagar.")
             return
 
         id_emprestimo = sel[0]
         emprestimo_alvo = next((e for e in self.emprestimos_ativos if e["id"] == id_emprestimo), None)
 
         if not emprestimo_alvo:
-            messagebox.showerror("Erro", "Empréstimo não encontrado. A lista pode estar desatualizada.")
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Erro", "Empréstimo não encontrado. A lista pode estar desatualizada.")
             self.atualizar_ui_geral()
             return
             
         valor_devido = emprestimo_alvo["valor_devido"]
         
         valor_pagar_str = simpledialog.askstring("Pagar Empréstimo", 
-                                                 f"Banco: {emprestimo_alvo['banco']}\nValor devido: R$ {valor_devido:,.2f}\n\nQuanto você deseja pagar?",
+                                                 f"Banco: {emprestimo_alvo['banco']}\nValor devido: {formatar_moeda(valor_devido)}\n\nQuanto você deseja pagar?",
                                                  parent=self.root)
         
         if not valor_pagar_str: return
@@ -642,15 +652,15 @@ class JogoFazenda:
         try:
             valor_pago = float(valor_pagar_str)
         except ValueError:
-            messagebox.showerror("Valor Inválido", "Por favor, digite um número.")
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Valor Inválido", "Por favor, digite um número.")
             return
 
         if valor_pago <= 0:
-            messagebox.showwarning("Valor Inválido", "O valor a ser pago deve ser positivo.")
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Valor Inválido", "O valor a ser pago deve ser positivo.")
             return
             
         if valor_pago > self.dinheiro:
-            messagebox.showerror("Sem Dinheiro", "Você não tem dinheiro suficiente para fazer este pagamento.")
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Sem Dinheiro", "Você não tem dinheiro suficiente para fazer este pagamento.")
             return
         
         # Calcular valor máximo de pagamento (clamp)
@@ -661,9 +671,9 @@ class JogoFazenda:
         
         if quitado:
             self.emprestimos_ativos.remove(emprestimo_alvo)
-            self.log(f"Empréstimo com {emprestimo_alvo['banco']} foi quitado! (Pagamento final: R$ {valor_pago:,.2f})")
+            self.log(f"Empréstimo com {emprestimo_alvo['banco']} foi quitado! (Pagamento final: {formatar_moeda(valor_pago)})")
         else:
-            self.log(f"Amortizou R$ {valor_pago:,.2f} do empréstimo com {emprestimo_alvo['banco']}.")
+            self.log(f"Amortizou {formatar_moeda(valor_pago)} do empréstimo com {emprestimo_alvo['banco']}.")
 
         self.atualizar_ui_geral()
 
@@ -671,7 +681,8 @@ class JogoFazenda:
         if not hasattr(self, 'tree_emprestimos'): return
         for i in self.tree_emprestimos.get_children(): self.tree_emprestimos.delete(i)
 
-        self.tree_emprestimos.tag_configure('vencendo', foreground='orange', font=('Arial', 11, 'bold'))
+        self.tree_emprestimos.tag_configure('vencendo', foreground='orange', font=self.ui_fonts['font_botao'])
+        self._configurar_ordenacao_treeview(self.tree_emprestimos, colunas_numericas=['Valor Devido'])
 
         semana_atual = self.dia // 7
         for emp in self.emprestimos_ativos:
@@ -686,7 +697,7 @@ class JogoFazenda:
             self.tree_emprestimos.insert("", "end", iid=emp["id"], tags=tags, values=(
                 emp["id"], # Oculto
                 emp["banco"],
-                f"R$ {emp['valor_devido']:,.2f}",
+                formatar_moeda(emp['valor_devido']),
                 f"{emp['juros_semana']*4*100:.1f}%",
                 emp["garantia_desc"],
                 prazo_str
@@ -695,6 +706,29 @@ class JogoFazenda:
     # ------------------------------------------------------------------
     # LÓGICA DE TEMPO AUTOMÁTICA
     # ------------------------------------------------------------------
+    def _pausar_e_exibir_dialogo(self, dialog_func, *args, **kwargs):
+        """
+        Pausa o jogo, exibe um diálogo e retoma a velocidade anterior.
+        Garante que o jogo fica pausado enquanto o diálogo estiver aberto.
+        """
+        velocidade_anterior = self.velocidade_atual
+        
+        # Pausa o jogo se não estiver já pausado
+        if velocidade_anterior > 0:
+            self.velocidade_atual = 0
+            # Cancela loop temporal se existir
+            if self.job_tempo is not None:
+                self.root.after_cancel(self.job_tempo)
+                self.job_tempo = None
+        
+        try:
+            # Exibe o diálogo (bloqueia até ser fechado)
+            return dialog_func(*args, **kwargs)
+        finally:
+            # Restaura velocidade anterior após o diálogo fechar
+            if velocidade_anterior > 0 and velocidade_anterior != self.velocidade_atual:
+                self.alterar_velocidade(velocidade_anterior)
+    
     def alterar_velocidade(self, mult):
         self.velocidade_atual = mult
         
@@ -744,7 +778,7 @@ class JogoFazenda:
         self.tree_agro.heading("Solo", text="Solo")
         self.tree_agro.heading("Ciclo", text="Dias")
         self.tree_agro.heading("Custo", text="Custo Plantio")
-        self.tree_agro.heading("Venda Atual", text="Venda/kg (Mercado)")
+        self.tree_agro.heading("Venda Atual", text="Receita/ha (Mercado)")
         self.tree_agro.column("Nvl", width=30)
         self.tree_agro.column("Solo", width=60)
         self.tree_agro.column("Ciclo", width=40)
@@ -752,7 +786,16 @@ class JogoFazenda:
         self.tree_agro.column("Venda Atual", width=120, anchor="e")
         
         self.tree_agro.tag_configure('bloqueado', foreground='#999999')
+        self._configurar_ordenacao_treeview(self.tree_agro, colunas_numericas=["Nvl", "Ciclo", "Custo", "Venda Atual"])
         self.tree_agro.pack(fill="both", expand=True)
+        
+        # Filtro simples
+        frame_filtro_agro = tk.Frame(frame_seeds)
+        frame_filtro_agro.pack(fill="x", pady=(5, 0))
+        tk.Label(frame_filtro_agro, text="Filtrar:").pack(side="left", padx=(0, 5))
+        self.entry_filtro_agro = tk.Entry(frame_filtro_agro)
+        self.entry_filtro_agro.pack(side="left", fill="x", expand=True)
+        self.entry_filtro_agro.bind('<KeyRelease>', lambda e: self._aplicar_filtro_treeview(self.tree_agro, self.entry_filtro_agro.get()))
 
         frame_botoes_agro = tk.Frame(frame_seeds)
         frame_botoes_agro.pack(fill="x")
@@ -857,6 +900,15 @@ class JogoFazenda:
         
         self.tree_mercado.tag_configure('alta', foreground='green')
         self.tree_mercado.tag_configure('baixa', foreground='red')
+        self._configurar_ordenacao_treeview(self.tree_mercado, colunas_numericas=['Preco Base', 'Preco Atual'])
+        
+        # Filtro simples
+        frame_filtro_mercado = tk.Frame(frame_mercado)
+        frame_filtro_mercado.pack(fill="x", pady=(5, 0))
+        tk.Label(frame_filtro_mercado, text="Filtrar:").pack(side="left", padx=(0, 5))
+        self.entry_filtro_mercado = tk.Entry(frame_filtro_mercado)
+        self.entry_filtro_mercado.pack(side="left", fill="x", expand=True)
+        self.entry_filtro_mercado.bind('<KeyRelease>', lambda e: self._aplicar_filtro_treeview(self.tree_mercado, self.entry_filtro_mercado.get()))
 
         self.tree_mercado.pack(fill="both", expand=True)
 
@@ -882,7 +934,17 @@ class JogoFazenda:
         self.tree_estoque.column('Preço Mercado', anchor='e')
         self.tree_estoque.column('Margem Est. (%)', anchor='e')
         self.tree_estoque.tag_configure('alta', foreground='green')
+        self._configurar_ordenacao_treeview(self.tree_estoque, colunas_numericas=['Qtd (kg)', 'Custo/kg', 'Preço Mercado', 'Margem Est. (%)'])
         self.tree_estoque.pack(fill="both", expand=True)
+        
+        # Filtro simples
+        frame_filtro_estoque = tk.Frame(frame_estoque)
+        frame_filtro_estoque.pack(fill="x", pady=(5, 0))
+        tk.Label(frame_filtro_estoque, text="Filtrar:").pack(side="left", padx=(0, 5))
+        self.entry_filtro_estoque = tk.Entry(frame_filtro_estoque)
+        self.entry_filtro_estoque.pack(side="left", fill="x", expand=True)
+        self.entry_filtro_estoque.bind('<KeyRelease>', lambda e: self._aplicar_filtro_treeview(self.tree_estoque, self.entry_filtro_estoque.get()))
+        
         tk.Button(frame_estoque, text="Vender Lote Selecionado", font=self.ui_fonts['font_botao'], bg="#FF6347", command=self.vender_lote_estoque).pack(fill="x", pady=(5,0))
 
         # --- PAINEL DE CONTROLES ---
@@ -935,10 +997,14 @@ class JogoFazenda:
                 i, # ID oculto
                 cultura_base["nome"],
                 f"{lote['quantidade_kg']:,.0f}",
-                f"R$ {lote['custo_producao_por_kg']:.2f}",
-                f"R$ {preco_mercado_atual_kg:.2f}",
+                formatar_moeda(lote['custo_producao_por_kg']),
+                formatar_moeda(preco_mercado_atual_kg),
                 f"{margem_lucro:.1f}%"
             ))
+        
+        # Reaplicar filtro se existir
+        if hasattr(self, 'entry_filtro_estoque') and self.entry_filtro_estoque.get():
+            self._aplicar_filtro_treeview(self.tree_estoque, self.entry_filtro_estoque.get())
 
         # Atualiza controles
         self.combo_gerente_colheita.set(self.config_gerente["acao_colheita"])
@@ -981,14 +1047,14 @@ class JogoFazenda:
     def vender_lote_estoque(self):
         sel = self.tree_estoque.selection()
         if not sel:
-            messagebox.showwarning("Nenhum Lote", "Selecione um lote do estoque para vender.")
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Nenhum Lote", "Selecione um lote do estoque para vender.")
             return
 
         item_id = int(self.tree_estoque.item(sel[0])["values"][0])
         
         # Como a lista pode mudar, precisamos re-encontrar o lote certo se formos vender múltiplos
         if item_id >= len(self.estoque):
-             messagebox.showerror("Erro", "O lote selecionado não existe mais. A lista foi atualizada.")
+             self._pausar_e_exibir_dialogo(messagebox.showerror, "Erro", "O lote selecionado não existe mais. A lista foi atualizada.")
              self.atualizar_ui_geral()
              return
 
@@ -1002,10 +1068,10 @@ class JogoFazenda:
         custo_total = lote["quantidade_kg"] * lote["custo_producao_por_kg"]
         lucro = valor_venda_total - custo_total
 
-        msg = f"Vender {lote['quantidade_kg']:,.0f} kg de {cultura_base['nome']} por R$ {valor_venda_total:,.2f}?\nLucro estimado: R$ {lucro:,.2f}"
-        if messagebox.askyesno("Confirmar Venda", msg):
+        msg = f"Vender {lote['quantidade_kg']:,.0f} kg de {cultura_base['nome']} por {formatar_moeda(valor_venda_total)}?\nLucro estimado: {formatar_moeda(lucro)}"
+        if self._pausar_e_exibir_dialogo(messagebox.askyesno, "Confirmar Venda", msg):
             self.dinheiro += valor_venda_total
-            self.log(f"Vendeu lote de {cultura_base['nome']} do estoque. Receita: R$ {valor_venda_total:,.2f}.")
+            self.log(f"Vendeu lote de {cultura_base['nome']} do estoque. Receita: {formatar_moeda(valor_venda_total)}.")
             
             self.estoque.pop(item_id)
             self.atualizar_ui_geral()
@@ -1031,13 +1097,18 @@ class JogoFazenda:
         fazenda_alvo = next((f for f in self.fazendas if f["id"] == id_fazenda), None)
         if not fazenda_alvo: return
 
-        salario = self.get_salario_gerente(fazenda_alvo)
-        if salario == 0:
-            messagebox.showerror("Erro", "Tamanho de fazenda não compatível com a contratação de gerentes.")
+        # Verificar nível mínimo
+        if self.nivel < 2:
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Nível Insuficiente", "Contratar gerentes está disponível apenas a partir do nível 2.")
             return
 
-        msg = f"Contratar um gerente para '{fazenda_alvo.get('nome_personalizado', fazenda_alvo['nome'])}' custará R$ {salario:,.2f} a cada 4 semanas. Deseja continuar?"
-        if messagebox.askyesno("Contratar Gerente", msg):
+        salario = self.get_salario_gerente(fazenda_alvo)
+        if salario == 0:
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Erro", "Tamanho de fazenda não compatível com a contratação de gerentes.")
+            return
+
+        msg = f"Contratar um gerente para '{fazenda_alvo.get('nome_personalizado', fazenda_alvo['nome'])}' custará {formatar_moeda(salario)} a cada 4 semanas. Deseja continuar?"
+        if self._pausar_e_exibir_dialogo(messagebox.askyesno, "Contratar Gerente", msg):
             fazenda_alvo["tem_gerente"] = True
             self.log(f"Gerente contratado para {fazenda_alvo.get('nome_personalizado', fazenda_alvo['nome'])}.")
             self.atualizar_ui_geral()
@@ -1047,16 +1118,16 @@ class JogoFazenda:
         if not fazenda_alvo: return
 
         if not fazenda_alvo.get("tem_gerente"):
-             messagebox.showinfo("Informação", "Esta fazenda não possui um gerente.")
+             self._pausar_e_exibir_dialogo(messagebox.showinfo, "Informação", "Esta fazenda não possui um gerente.")
              return
 
         salario = self.get_salario_gerente(fazenda_alvo)
         custo_demissao = salario * 0.5
 
-        msg = f"Demitir o gerente de '{fazenda_alvo.get('nome_personalizado', fazenda_alvo['nome'])}' terá um custo de R$ {custo_demissao:,.2f}. Deseja continuar?"
-        if messagebox.askyesno("Demitir Gerente", msg):
+        msg = f"Demitir o gerente de '{fazenda_alvo.get('nome_personalizado', fazenda_alvo['nome'])}' terá um custo de {formatar_moeda(custo_demissao)}. Deseja continuar?"
+        if self._pausar_e_exibir_dialogo(messagebox.askyesno, "Demitir Gerente", msg):
             if self.dinheiro < custo_demissao:
-                messagebox.showerror("Sem Dinheiro", "Você não tem dinheiro suficiente para pagar a demissão.")
+                self._pausar_e_exibir_dialogo(messagebox.showerror, "Sem Dinheiro", "Você não tem dinheiro suficiente para pagar a demissão.")
                 return
             
             self.dinheiro -= custo_demissao
@@ -1130,6 +1201,11 @@ class JogoFazenda:
         fazenda_alvo = next((f for f in self.fazendas if f["id"] == id_fazenda), None)
         if not fazenda_alvo: return
 
+        # Verificar nível mínimo
+        if self.nivel < 2:
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Nível Insuficiente", "Contratar gerentes está disponível apenas a partir do nível 2.")
+            return
+
         # Se não tiver gerente, pergunta se quer contratar
         if not fazenda_alvo.get("tem_gerente"):
             self.contratar_gerente(id_fazenda)
@@ -1158,7 +1234,7 @@ class JogoFazenda:
     def vender_fazenda(self):
         sel = self.tree_imob_venda.selection()
         if not sel:
-            messagebox.showwarning("Nenhuma Seleção", "Selecione uma de suas propriedades para vender.")
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Nenhuma Seleção", "Selecione uma de suas propriedades para vender.")
             return
             
         item_selecionado = self.tree_imob_venda.item(sel[0])
@@ -1166,7 +1242,7 @@ class JogoFazenda:
         fazenda_alvo = next((f for f in self.fazendas if f["id"] == id_fazenda), None)
         
         if not fazenda_alvo:
-            messagebox.showerror("Erro", "Não foi possível encontrar a fazenda para vender.")
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Erro", "Não foi possível encontrar a fazenda para vender.")
             return
 
         nome_exibido = fazenda_alvo.get("nome_personalizado", fazenda_alvo["nome"])
@@ -1174,14 +1250,14 @@ class JogoFazenda:
         plantacoes_na_fazenda = self.plantacoes_por_fazenda.get(id_fazenda, [])
         pode_vender, motivo = pode_vender_fazenda(plantacoes_na_fazenda)
         if not pode_vender:
-            messagebox.showwarning("Venda Bloqueada", f"Você não pode vender a fazenda '{nome_exibido}' porque {motivo}")
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Venda Bloqueada", f"Você não pode vender a fazenda '{nome_exibido}' porque {motivo}")
             return
 
         # 2. Calcular o preço de venda e confirmar
         preco_venda = preco_venda_propriedade(fazenda_alvo["custo"])
-        msg = f"Tem certeza que deseja vender a propriedade '{nome_exibido}' por R$ {preco_venda:,.2f} (85% do valor de compra)?"
+        msg = f"Tem certeza que deseja vender a propriedade '{nome_exibido}' por {formatar_moeda(preco_venda)} (85% do valor de compra)?"
         
-        if messagebox.askyesno("Confirmar Venda de Propriedade", msg):
+        if self._pausar_e_exibir_dialogo(messagebox.askyesno, "Confirmar Venda de Propriedade", msg):
             # 3. Executar a venda
             self.dinheiro += preco_venda
             
@@ -1193,7 +1269,7 @@ class JogoFazenda:
                 del self.plantacoes_por_fazenda[id_fazenda]
             
             # A UI será completamente atualizada na chamada geral
-            self.log(f"Você vendeu a propriedade '{nome_exibido}' por R$ {preco_venda:,.2f}.")
+            self.log(f"Você vendeu a propriedade '{nome_exibido}' por {formatar_moeda(preco_venda)}.")
             self.atualizar_ui_geral()
 
     def comprar_fazenda(self):
@@ -1204,16 +1280,16 @@ class JogoFazenda:
         dados_fazenda = next((f for f in self.propriedades_a_venda if f["nome"] == nome_fazenda), None)
         
         if not dados_fazenda: 
-            messagebox.showinfo("Propriedade Indisponível", "Esta propriedade não está mais disponível para compra.")
+            self._pausar_e_exibir_dialogo(messagebox.showinfo, "Propriedade Indisponível", "Esta propriedade não está mais disponível para compra.")
             self.atualizar_ui_geral()
             return
 
         pode_comprar, motivo = pode_comprar_propriedade(self.dinheiro, dados_fazenda["custo"])
         if not pode_comprar:
-            messagebox.showerror("Sem Dinheiro", motivo)
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Sem Dinheiro", motivo)
             return
         
-        if messagebox.askyesno("Confirmar Compra", f"Tem certeza que deseja comprar a propriedade '{nome_fazenda}' por R$ {dados_fazenda['custo']:,.2f}?"):
+        if self._pausar_e_exibir_dialogo(messagebox.askyesno, "Confirmar Compra", f"Tem certeza que deseja comprar a propriedade '{nome_fazenda}' por {formatar_moeda(dados_fazenda['custo'])}?"):
             
             nova_fazenda = dados_fazenda.copy()
             nova_fazenda["tem_gerente"] = False
@@ -1241,7 +1317,7 @@ class JogoFazenda:
             # A verificação por ID previne que uma propriedade comprada e renomeada apareça na lista de compra
             if f["id"] not in ids_fazendas_possuidas:
                 self.tree_imob_loja.insert("", "end",
-                                           values=(f["nome"], f["tam"], f["solo"], f"R$ {f['custo']:,.0f}"))
+                                           values=(f["nome"], f["tam"], f["solo"], formatar_moeda(f['custo'], 0)))
 
         # Popula a lista de MINHAS PROPRIEDADES (para vender)
         for f in self.fazendas:
@@ -1249,7 +1325,7 @@ class JogoFazenda:
             valor_venda = preco_venda_propriedade(f["custo"])
             ocupacao = f"{len(self.plantacoes_por_fazenda.get(f['id'], []))}/{f['tam']} ha"
             self.tree_imob_venda.insert("", "end",
-                                        values=(f["id"], nome_exibido, f["tam"], ocupacao, f"R$ {valor_venda:,.0f}"))
+                                        values=(f["id"], nome_exibido, f["tam"], ocupacao, formatar_moeda(valor_venda, 0)))
 
     # ------------------------------------------------------------------
     # LÓGICA DE JOGO (INALTERADA)
@@ -1269,16 +1345,21 @@ class JogoFazenda:
             tag = ('bloqueado',) if bloqueado else ()
             
             multiplicador = self.mercado_multiplicadores.get(c["nome"], 1.0)
-            venda_atual = c["preco_venda"] * multiplicador
+            preco_venda_kg_atual = c["preco_venda"] * multiplicador
+            receita_ha = c["kg_hectare"] * preco_venda_kg_atual
 
             item_id = self.tree_agro.insert("", "end", 
-                                  values=(c["nome"], c["nivel_req"], c["solo_ideal"], int(c["dias_totais"]), f"R$ {c['custo_semente']:.0f}", f"R$ {venda_atual:.2f}"),
+                                  values=(c["nome"], c["nivel_req"], c["solo_ideal"], int(c["dias_totais"]), formatar_moeda(c['custo_semente'], 0), formatar_moeda(receita_ha, 0)),
                                   tags=tag)
             if c["nome"] in sel_agro_nomes:
                 ids_para_selecionar_agro.append(item_id)
 
         if ids_para_selecionar_agro:
             self.tree_agro.selection_set(ids_para_selecionar_agro)
+        
+        # Reaplicar filtro se existir
+        if hasattr(self, 'entry_filtro_agro') and self.entry_filtro_agro.get():
+            self._aplicar_filtro_treeview(self.tree_agro, self.entry_filtro_agro.get())
 
         ids_para_selecionar_maq = []
         for m in self.maquinas_catalogo:
@@ -1291,41 +1372,45 @@ class JogoFazenda:
                 txt_efeito = f"{m['funcao']} +{int(m['valor_bonus']*100)}%"
 
             item_id = self.tree_maq_loja.insert("", "end", 
-                                      values=(m["nome"], m["nivel_req"], txt_efeito, f"{m['preco']:.0f}", f"{m['manutencao']:.1f}"),
+                                      values=(m["nome"], m["nivel_req"], txt_efeito, formatar_moeda(m['preco'], 0), formatar_moeda(m['manutencao'], 1)),
                                       tags=tag)
             if m["nome"] in sel_maq_nomes:
                 ids_para_selecionar_maq.append(item_id)
-        
+
         if ids_para_selecionar_maq:
             self.tree_maq_loja.selection_set(ids_para_selecionar_maq)
+        
+        # Reaplicar filtro se existir
+        if hasattr(self, 'entry_filtro_maq') and self.entry_filtro_maq.get():
+            self._aplicar_filtro_treeview(self.tree_maq_loja, self.entry_filtro_maq.get())
 
     def plantar(self):
         # 1. Identificar a fazenda selecionada na UI
         if not self.notebook_fazendas or not self.notebook_fazendas.tabs():
-            messagebox.showwarning("Nenhuma Fazenda", "Você precisa comprar uma propriedade antes de plantar.")
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Nenhuma Fazenda", "Você precisa comprar uma propriedade antes de plantar.")
             return
             
         aba_selecionada_id = self.notebook_fazendas.select()
         if not aba_selecionada_id:
-            messagebox.showwarning("Selecione uma Fazenda", "Selecione a aba da fazenda onde deseja plantar.")
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Selecione uma Fazenda", "Selecione a aba da fazenda onde deseja plantar.")
             return
 
         id_fazenda_alvo = self.mapa_tabs_fazendas.get(aba_selecionada_id)
         if not id_fazenda_alvo:
-            messagebox.showerror("Erro de Interface", "Não foi possível identificar a fazenda selecionada. Tente reiniciar o jogo.")
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Erro de Interface", "Não foi possível identificar a fazenda selecionada. Tente reiniciar o jogo.")
             return
 
         fazenda_alvo = next((f for f in self.fazendas if f["id"] == id_fazenda_alvo), None)
         plantacao_alvo = self.plantacoes_por_fazenda.get(id_fazenda_alvo)
 
         if not fazenda_alvo or plantacao_alvo is None:
-            messagebox.showerror("Erro Interno", "Não foi possível encontrar os dados da fazenda selecionada.")
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Erro Interno", "Não foi possível encontrar os dados da fazenda selecionada.")
             return
 
         # 2. Obter sementes selecionadas no catálogo
         sel_sementes = self.tree_agro.selection()
         if not sel_sementes:
-            messagebox.showwarning("Nenhuma Semente", "Selecione uma ou mais sementes no catálogo para plantar.")
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Nenhuma Semente", "Selecione uma ou mais sementes no catálogo para plantar.")
             return
 
         # Obter dados das culturas selecionadas
@@ -1342,11 +1427,11 @@ class JogoFazenda:
         
         if not ok:
             if "exige Nível" in erro_msg:
-                messagebox.showwarning("Nível Insuficiente", erro_msg)
+                self._pausar_e_exibir_dialogo(messagebox.showwarning, "Nível Insuficiente", erro_msg)
             elif "Espaço insuficiente" in erro_msg:
-                messagebox.showerror("Sem Espaço", erro_msg)
+                self._pausar_e_exibir_dialogo(messagebox.showerror, "Sem Espaço", erro_msg)
             elif "Dinheiro insuficiente" in erro_msg:
-                messagebox.showerror("Sem Dinheiro", erro_msg)
+                self._pausar_e_exibir_dialogo(messagebox.showerror, "Sem Dinheiro", erro_msg)
             return
             
         # 4. Executar o plantio na fazenda correta
@@ -1354,7 +1439,7 @@ class JogoFazenda:
         novas_plantacoes = criar_plantacoes(novas_plantas_dados, fazenda_alvo["solo"])
         plantacao_alvo.extend(novas_plantacoes)
             
-        self.log(f"Plantou {len(novas_plantas_dados)} ha em '{fazenda_alvo.get('nome_personalizado', fazenda_alvo['nome'])}'. Custo: R$ {custo_total:.2f}")
+        self.log(f"Plantou {len(novas_plantas_dados)} ha em '{fazenda_alvo.get('nome_personalizado', fazenda_alvo['nome'])}'. Custo: {formatar_moeda(custo_total)}")
         self.atualizar_ui_geral()
 
     def comprar_maquina(self):
@@ -1370,11 +1455,11 @@ class JogoFazenda:
             slots_usados = len([m for m in self.meus_equipamentos if m['funcao'] != 'Armazenagem'])
 
             if slots_usados >= limite_maquinas:
-                messagebox.showwarning("Garagem Cheia", f"Sua garagem para máquinas produtivas está cheia! Limite atual: {limite_maquinas} slots.\n\nCompre mais terras para aumentar sua capacidade. Silos e Armazéns não ocupam slots.")
+                self._pausar_e_exibir_dialogo(messagebox.showwarning, "Garagem Cheia", f"Sua garagem para máquinas produtivas está cheia! Limite atual: {limite_maquinas} slots.\n\nCompre mais terras para aumentar sua capacidade. Silos e Armazéns não ocupam slots.")
                 return
 
         if self.nivel < dados["nivel_req"]:
-            messagebox.showwarning("Bloqueado", f"Exige Nível {dados['nivel_req']}.")
+            self._pausar_e_exibir_dialogo(messagebox.showwarning, "Bloqueado", f"Exige Nível {dados['nivel_req']}.")
             return
         if self.dinheiro >= dados["preco"]:
             self.dinheiro -= dados["preco"]
@@ -1383,7 +1468,7 @@ class JogoFazenda:
             self.log(f"Comprou {nome}!")
             self.atualizar_ui_geral()
         else:
-            messagebox.showerror("Caro", "Dinheiro insuficiente.")
+            self._pausar_e_exibir_dialogo(messagebox.showerror, "Caro", "Dinheiro insuficiente.")
 
     def vender_maquina(self):
         indices_selecionados = self.lista_garagem.curselection()
@@ -1399,11 +1484,11 @@ class JogoFazenda:
 
         qtd_itens = len(nomes_maquinas)
         if qtd_itens == 1:
-            msg_confirm = f"Vender '{nomes_maquinas[0]}' por R$ {total_venda:,.2f} (85% do valor de compra)?"
+            msg_confirm = f"Vender '{nomes_maquinas[0]}' por {formatar_moeda(total_venda)} (85% do valor de compra)?"
         else:
-            msg_confirm = f"Vender {qtd_itens} itens selecionados por um total de R$ {total_venda:,.2f}?"
+            msg_confirm = f"Vender {qtd_itens} itens selecionados por um total de {formatar_moeda(total_venda)}?"
 
-        confirmado = messagebox.askyesno("Confirmar Venda", msg_confirm)
+        confirmado = self._pausar_e_exibir_dialogo(messagebox.askyesno, "Confirmar Venda", msg_confirm)
 
         if confirmado:
             # É crucial remover pelos índices em ordem reversa para não bagunçar a lista
@@ -1412,7 +1497,7 @@ class JogoFazenda:
             
             self.atualizar_capacidade_armazenagem() # NOVO
             self.dinheiro += total_venda
-            self.log(f"Vendeu {qtd_itens} equipamento(s) por R$ {total_venda:,.2f}.")
+            self.log(f"Vendeu {qtd_itens} equipamento(s) por {formatar_moeda(total_venda)}.")
             self.atualizar_ui_geral()
 
     def _ask_vender_ou_armazenar(self, parent, total_kg, tipo_cultura):
@@ -1445,9 +1530,6 @@ class JogoFazenda:
     def colher(self, id_fazenda):
         tree = self.trees_fazenda.get(id_fazenda)
         if not tree: return
-
-        sel = tree.selection()
-        if not sel: return
         
         plantacao_alvo = self.plantacoes_por_fazenda.get(id_fazenda)
         fazenda_alvo = next((f for f in self.fazendas if f["id"] == id_fazenda), None)
@@ -1455,13 +1537,14 @@ class JogoFazenda:
         
         nome_exibido = fazenda_alvo.get("nome_personalizado", fazenda_alvo["nome"])
         
-        # Obter índices das plantações selecionadas
-        indices_selecionadas = [tree.index(item) for item in sel]
+        # Obter índices de todas as plantações PRONTAS (sem necessidade de seleção)
+        indices_prontas = [i for i, p in enumerate(plantacao_alvo) if p.get("estado") == "PRONTA"]
+        if not indices_prontas: return
         
         bonus_prod = self.get_bonus_acumulado("Produtividade")
 
         # Calcular lotes de colheita (lógica pura)
-        lotes_a_colher, indices_para_remover = colheita_lotes(plantacao_alvo, indices_selecionadas, bonus_prod)
+        lotes_a_colher, indices_para_remover = colheita_lotes(plantacao_alvo, indices_prontas, bonus_prod)
 
         if not lotes_a_colher: return
 
@@ -1481,7 +1564,7 @@ class JogoFazenda:
                     return
             # Se não tem capacidade, a ação padrão é vender
         else:
-            messagebox.showinfo("Armazenamento Cheio", f"Espaço insuficiente no {tipo_armazenagem}. A colheita será vendida diretamente.")
+            self._pausar_e_exibir_dialogo(messagebox.showinfo, "Armazenamento Cheio", f"Espaço insuficiente no {tipo_armazenagem}. A colheita será vendida diretamente.")
 
         # Executa a ação
         if acao == "armazenar":
@@ -1497,11 +1580,23 @@ class JogoFazenda:
         elif acao == "vender":
             multiplicador_mercado = self.mercado_multiplicadores.get(nome_cultura, 1.0)
             preco_venda_kg = preco_mercado_atual(cultura_base["preco_venda"], multiplicador_mercado)
-            receita_bruta = total_kg_colhido * preco_venda_kg
-            
-            self.dinheiro += receita_bruta
-            self.ganhar_xp(receita_bruta / 150) # XP por vender
-            self.log(f"Colheita em '{nome_exibido}' vendida por R$ {receita_bruta:,.2f}.")
+
+            # Calcular receita base e receita advinda dos bônus de equipamentos
+            receita_base = 0.0
+            receita_bonus = 0.0
+            for lote in lotes_a_colher:
+                comp = lote.get("compativel", True)
+                base_kg = lote["dados_base"]["kg_hectare"] * (0.6 if not comp else 1.0)
+                produced_kg = lote["quantidade_kg"]
+                bonus_kg = max(0.0, produced_kg - base_kg)
+                receita_base += base_kg * preco_venda_kg
+                receita_bonus += bonus_kg * preco_venda_kg
+
+            receita_total = receita_base + receita_bonus
+
+            self.dinheiro += receita_total
+            self.ganhar_xp(receita_total / 150) # XP por vender
+            self.log(f"Colheita vendida em '{nome_exibido}': receita base {formatar_moeda(receita_base)}, Bônus Equipamentos {formatar_moeda(receita_bonus)}, total {formatar_moeda(receita_total)}.")
 
         # Remove as plantações colhidas da fazenda
         for i in sorted(indices_para_remover, reverse=True):
@@ -1512,12 +1607,23 @@ class JogoFazenda:
     def ganhar_xp(self, valor):
         self.xp += valor
         req = int(2500 * (1.5**(self.nivel - 1)))
+        nivel_anterior = self.nivel
         while self.xp >= req:
             self.nivel += 1
             self.xp -= req
-            messagebox.showinfo("LEVEL UP!", f"Nível {self.nivel}!\nNovos itens liberados.")
+            self._pausar_e_exibir_dialogo(messagebox.showinfo, "LEVEL UP!", f"Nível {self.nivel}!\nNovos itens liberados.")
             self.atualizar_listas_lojas()
             req = int(2500 * (1.5**(self.nivel - 1)))
+        
+        # Avisar sobre gerentes ao atingir nível 2
+        if nivel_anterior < 2 and self.nivel >= 2:
+            msg = "🎉 Você desbloqueou a opção de contratar gerentes!\n\n"
+            msg += "Gerentes podem gerenciar suas fazendas automaticamente:\n"
+            msg += "• Colhem plantações prontas automaticamente\n"
+            msg += "• Plantam culturas automaticamente\n"
+            msg += "• Podem focar em uma cultura específica ou trabalhar automaticamente\n\n"
+            msg += "Acesse a opção 'Contratar Gerente' nas abas de suas fazendas."
+            self._pausar_e_exibir_dialogo(messagebox.showinfo, "Nova Funcionalidade Desbloqueada", msg)
 
     def gerente_colher(self, id_fazenda):
         plantacao_alvo = self.plantacoes_por_fazenda.get(id_fazenda)
@@ -1591,7 +1697,7 @@ class JogoFazenda:
                 receita_bruta = total_kg * preco_venda_kg
                 self.dinheiro += receita_bruta
                 self.ganhar_xp(receita_bruta / 150)
-                log_msgs.append(f"vendeu {total_kg:,.0f} kg de {nome_cultura} por R$ {receita_bruta:,.2f}")
+                log_msgs.append(f"vendeu {total_kg:,.0f} kg de {nome_cultura} por {formatar_moeda(receita_bruta)}")
 
         # Finalizar
         if log_msgs:
@@ -1658,7 +1764,7 @@ class JogoFazenda:
             log_msg = f"Gerente de '{nome_exibido}' plantou {plantios_feitos} ha"
             if log_cultura_especifica:
                 log_msg += f" de '{nome_cultura_plantada}'"
-            log_msg += f". Custo: R$ {custo_total:,.2f}."
+            log_msg += f". Custo: {formatar_moeda(custo_total)}."
             self.log(log_msg)
 
     def passar_dia(self):
@@ -1701,9 +1807,9 @@ class JogoFazenda:
         
         for alerta in alertas:
             if alerta["tipo"] == "info":
-                messagebox.showinfo(alerta["titulo"], alerta["mensagem"])
+                self._pausar_e_exibir_dialogo(messagebox.showinfo, alerta["titulo"], alerta["mensagem"])
             elif alerta["tipo"] == "warning":
-                messagebox.showwarning(alerta["titulo"], alerta["mensagem"])
+                self._pausar_e_exibir_dialogo(messagebox.showwarning, alerta["titulo"], alerta["mensagem"])
         
         # --- LÓGICA DO GERENTE (ações automáticas) ---
         semana = int(self.dia / 7)
@@ -1733,7 +1839,7 @@ class JogoFazenda:
             garantia = default_info["garantia"]
             valor_devido = default_info["valor_devido"]
             
-            self.log(f"!!! INADIMPLENTE !!! Empréstimo com {banco} no valor de R$ {valor_devido:,.2f} não foi pago no prazo.")
+            self.log(f"!!! INADIMPLENTE !!! Empréstimo com {banco} no valor de {formatar_moeda(valor_devido)} não foi pago no prazo.")
 
             if not garantia or garantia.get("tipo") == "nenhuma":
                 self.log(f"Sua reputação foi afetada por não pagar o {banco}.")
@@ -1749,7 +1855,7 @@ class JogoFazenda:
                         del self.plantacoes_por_fazenda[id_fazenda]
                     
                     msg = f"Você não pagou o empréstimo do {banco} a tempo e perdeu a fazenda '{nome_fazenda}'!"
-                    messagebox.showerror("PERDA DE GARANTIA", msg)
+                    self._pausar_e_exibir_dialogo(messagebox.showerror, "PERDA DE GARANTIA", msg)
                     self.log(f"GARANTIA EXECUTADA: {msg}")
                 else:
                     self.log(f"O {banco} tentou tomar sua fazenda, mas ela não existe mais.")
@@ -1757,7 +1863,7 @@ class JogoFazenda:
             elif garantia["tipo"] == "maquinas":
                 if self.meus_equipamentos:
                     msg = f"Você não pagou o empréstimo da {banco} e perdeu TODOS os seus equipamentos!"
-                    messagebox.showerror("PERDA DE GARANTIA", msg)
+                    self._pausar_e_exibir_dialogo(messagebox.showerror, "PERDA DE GARANTIA", msg)
                     self.log(f"GARANTIA EXECUTADA: {msg}")
                     self.meus_equipamentos.clear()
                     self.atualizar_capacidade_armazenagem()
@@ -1785,11 +1891,11 @@ class JogoFazenda:
                 lotes_vendidos.append(lote_info["descricao"])
                 self.estoque.pop(lote_info["indice"])
             
-            self.log(f"Venda automática ativada: {', '.join(lotes_vendidos)} vendidos por R$ {receita_total:,.2f}.")
+            self.log(f"Venda automática ativada: {', '.join(lotes_vendidos)} vendidos por {formatar_moeda(receita_total)}.")
 
     def atualizar_ui_geral(self):
         self.lbl_nivel.config(text=f"⭐ Nível {self.nivel} (XP: {int(self.xp)})")
-        self.lbl_dinheiro.config(text=f"R$ {self.dinheiro:,.2f}")
+        self.lbl_dinheiro.config(text=formatar_moeda(self.dinheiro))
         semana = self.dia // 7
         ano = max(1, (semana - 1) // 52 + 1)
         semana_no_ano = (semana - 1) % 52 + 1 if semana > 0 else 1
@@ -1870,16 +1976,20 @@ class JogoFazenda:
                     btn_gerente = tk.Button(frame_botoes, text="", font=self.ui_fonts['font_botao'], command=lambda f_id=id_fazenda: self.abrir_configuracao_gerente(f_id))
                     btn_gerente.pack(side="right", padx=5)
                     self.botoes_gerente_fazenda[id_fazenda] = btn_gerente
+                    # Configurar estado inicial baseado no nível (será atualizado logo após)
                 else:
                     self.notebook_fazendas.tab(tab_id, text=tab_text)
 
                 # Atualizar botão do gerente
                 if id_fazenda in self.botoes_gerente_fazenda:
                     btn = self.botoes_gerente_fazenda[id_fazenda]
-                    if fazenda.get("tem_gerente"):
-                        btn.config(text="Gerenciar...", bg="#ADD8E6")
+                    if self.nivel < 2:
+                        # Desabilitar botão se nível < 2
+                        btn.config(text="Contratar Gerente (Nível 2)", bg="#CCCCCC", state="disabled")
+                    elif fazenda.get("tem_gerente"):
+                        btn.config(text="Gerenciar...", bg="#ADD8E6", state="normal")
                     else:
-                        btn.config(text="Contratar Gerente", bg="#ADD8E6")
+                        btn.config(text="Contratar Gerente", bg="#ADD8E6", state="normal")
 
             # 4. Popular/Atualizar todas as árvores de plantação
             for id_fazenda, tree in self.trees_fazenda.items():
@@ -1967,10 +2077,14 @@ class JogoFazenda:
                 
             self.tree_mercado.insert("", "end", tags=(tag,), values=(
                 nome,
-                f"R$ {preco_base:,.2f}",
+                formatar_moeda(preco_base),
                 tendencia_str,
-                f"R$ {preco_atual:,.2f}"
+                formatar_moeda(preco_atual)
             ))
+        
+        # Reaplicar filtro se existir
+        if hasattr(self, 'entry_filtro_mercado') and self.entry_filtro_mercado.get():
+            self._aplicar_filtro_treeview(self.tree_mercado, self.entry_filtro_mercado.get())
 
     def log(self, t):
         self.txt_log.config(state="normal")

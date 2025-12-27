@@ -1,337 +1,46 @@
-SMOKE TEST REPORT
-seed=12345, semanas=160
+SMOKE DEFAULT REPORT
+started: 2025-12-27T14:55:29.697734
+weeks: 52
+seed: 123
+project_root: C:\Users\hvero\CursorFarm
 
-SMOKE: plantou 3 ha (custo 6,000.00)
-[semana 1] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: plantou 3 ha (custo 6,200.00)
-[semana 2] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: plantou 3 ha (custo 6,400.00)
-[semana 3] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 4] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 5] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 6] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 7] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 8] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 9] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 8,164.84)
-[semana 10] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 10: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-SMOKE: colheu/vendeu 2 ha (receita 15,784.59)
-[semana 11] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 11: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-SMOKE: colheu/vendeu 2 ha (receita 15,028.90)
-[semana 12] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária! | Semana 12: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,200.00)
-SMOKE: colheu/vendeu 1 ha (receita 8,105.75)
-[semana 13] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 13: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 8,344.10)
-[semana 14] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 14: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 15] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 22,213.58)
-[semana 16] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 16: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-[semana 17] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 18] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 13,079.17)
-[semana 19] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 19: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 20] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,718.63)
-[semana 21] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 21: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,356.37)
-[semana 22] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 22: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-[semana 23] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,028.17)
-[semana 24] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária! | Semana 24: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 8,559.78)
-[semana 25] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 25: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 26] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 27] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 8,315.05)
-[semana 28] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 28: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-[semana 29] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 12,093.96)
-[semana 30] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 30: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 11,648.22)
-[semana 31] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 31: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-SMOKE: colheu/vendeu 1 ha (receita 4,855.16)
-[semana 32] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 32: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 8,256.46)
-[semana 33] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 33: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-SMOKE: colheu/vendeu 2 ha (receita 21,191.96)
-[semana 34] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 34: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 3,600.00)
-[semana 35] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 36] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária!
-[semana 37] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 38] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 17,035.06)
-[semana 39] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 39: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 3,800.00)
-SMOKE: colheu/vendeu 1 ha (receita 10,160.18)
-[semana 40] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 40: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-SMOKE: colheu/vendeu 1 ha (receita 4,836.24)
-[semana 41] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 41: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 42] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 43] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 10,669.15)
-[semana 44] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 44: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-[semana 45] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 10,788.11)
-[semana 46] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 46: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-[semana 47] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 14,056.68)
-[semana 48] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária! | Semana 48: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 10,618.86)
-[semana 49] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 49: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-SMOKE: colheu/vendeu 1 ha (receita 10,910.08)
-[semana 50] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 50: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 51] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 52] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 53] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 6,365.90)
-[semana 54] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 54: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 6,215.74)
-[semana 55] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 55: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,803.61)
-[semana 56] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 56: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-SMOKE: colheu/vendeu 2 ha (receita 15,937.66)
-[semana 57] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 57: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,712.52)
-[semana 58] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 58: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 59] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | DESASTRE: A seca extrema destruiu 1 ha de 'Milho' na fazenda 'Fazenda Inicial'!
-[semana 59] ALERTAS: [{'tipo': 'warning', 'titulo': 'DESASTRE CLIMÁTICO', 'mensagem': "A seca extrema destruiu 1 ha de 'Milho' na fazenda 'Fazenda Inicial'!"}]
-SMOKE: plantou 1 ha (custo 2,000.00)
-[semana 60] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária!
-SMOKE: colheu/vendeu 1 ha (receita 6,057.57)
-[semana 61] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 61: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,850.78)
-[semana 62] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 62: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-[semana 63] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 7,017.88)
-[semana 64] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 64: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 65] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 7,041.68)
-[semana 66] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 66: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-[semana 67] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 68] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,444.52)
-[semana 69] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 69: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 70] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 71] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 16,197.25)
-[semana 72] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária! | Semana 72: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,200.00)
-SMOKE: colheu/vendeu 2 ha (receita 16,030.47)
-[semana 73] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 73: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 3,800.00)
-[semana 74] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 16,277.37)
-[semana 75] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 75: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 3,800.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,782.41)
-[semana 76] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 76: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-[semana 77] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 7,007.46)
-[semana 78] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 78: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-SMOKE: colheu/vendeu 1 ha (receita 9,005.11)
-[semana 79] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 79: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 80] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 81] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 82] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 11,288.49)
-[semana 83] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 83: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-[semana 84] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária!
-[semana 85] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 86] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,566.14)
-[semana 87] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 87: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,248.73)
-[semana 88] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 88: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-SMOKE: colheu/vendeu 2 ha (receita 13,906.39)
-[semana 89] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 89: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 3,600.00)
-SMOKE: colheu/vendeu 1 ha (receita 8,250.44)
-[semana 90] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 90: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 91] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 14,450.69)
-[semana 92] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 92: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-[semana 93] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 9,468.06)
-[semana 94] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 94: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-[semana 95] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 96] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária!
-[semana 97] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 98] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 99] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 3 ha (receita 21,368.66)
-[semana 100] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 100: 3 ha de plantações prontas para colher!
-SMOKE: plantou 3 ha (custo 5,800.00)
-[semana 101] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 102] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 8,651.08)
-[semana 103] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 103: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,200.00)
-SMOKE: colheu/vendeu 2 ha (receita 12,999.56)
-[semana 104] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 104: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,200.00)
-SMOKE: colheu/vendeu 1 ha (receita 3,929.16)
-[semana 105] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 105: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 106] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 3,500.00)
-[semana 107] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 107: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 108] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária!
-[semana 109] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 110] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 6,665.68)
-[semana 111] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 111: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 112] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 10,330.51)
-[semana 113] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 113: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,764.07)
-[semana 114] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 114: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 115] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 10,982.59)
-[semana 116] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 116: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-[semana 117] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 118] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 11,878.64)
-[semana 119] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 119: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,200.00)
-SMOKE: colheu/vendeu 2 ha (receita 12,753.67)
-[semana 120] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária! | Semana 120: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-[semana 121] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 122] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,556.13)
-[semana 123] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 123: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-SMOKE: colheu/vendeu 1 ha (receita 6,274.42)
-[semana 124] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 124: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 125] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 126] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 11,307.60)
-[semana 127] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 127: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 3,600.00)
-SMOKE: colheu/vendeu 1 ha (receita 6,159.82)
-[semana 128] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 128: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-[semana 129] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 10,966.06)
-[semana 130] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 130: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-SMOKE: colheu/vendeu 1 ha (receita 4,785.03)
-[semana 131] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 131: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-[semana 132] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária!
-[semana 133] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 12,291.37)
-[semana 134] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 134: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 3,600.00)
-SMOKE: colheu/vendeu 1 ha (receita 6,741.34)
-[semana 135] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 135: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-[semana 136] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 137] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 6,568.24)
-[semana 138] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 138: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-[semana 139] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 3 ha (receita 17,102.00)
-[semana 140] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 140: 3 ha de plantações prontas para colher!
-SMOKE: plantou 3 ha (custo 5,800.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,395.18)
-[semana 141] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 141: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 1,800.00)
-[semana 142] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 6,021.59)
-[semana 143] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 143: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-SMOKE: colheu/vendeu 1 ha (receita 6,930.91)
-[semana 144] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária! | Semana 144: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-[semana 145] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 146] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 2 ha (receita 11,364.43)
-[semana 147] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 147: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 3,600.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,228.04)
-[semana 148] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 148: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,000.00)
-[semana 149] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 150] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 151] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 6,029.18)
-[semana 152] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 152: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-[semana 153] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-SMOKE: colheu/vendeu 1 ha (receita 5,682.63)
-[semana 154] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 154: 1 ha de plantações prontas para colher!
-SMOKE: plantou 1 ha (custo 2,200.00)
-SMOKE: colheu/vendeu 2 ha (receita 11,642.05)
-[semana 155] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 155: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,200.00)
-[semana 156] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Novas propriedades disponíveis na imobiliária!
-[semana 157] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | DESASTRE: A seca extrema destruiu 1 ha de 'Milho' na fazenda 'Fazenda Inicial'!
-[semana 157] ALERTAS: [{'tipo': 'warning', 'titulo': 'DESASTRE CLIMÁTICO', 'mensagem': "A seca extrema destruiu 1 ha de 'Milho' na fazenda 'Fazenda Inicial'!"}]
-SMOKE: plantou 1 ha (custo 2,000.00)
-SMOKE: colheu/vendeu 2 ha (receita 13,899.48)
-[semana 158] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00) | Semana 158: 2 ha de plantações prontas para colher!
-SMOKE: plantou 2 ha (custo 4,000.00)
-[semana 159] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
-[semana 160] Custos semanais: -R$ 200.00 (Terras: R$ 200.00, Maquinário: R$ 0.00)
+--- TRACE (last 25) ---
+W028 | semana=028 | dinheiro=44400.0 | clima=Nublado | prontas=1
+W029 | semana=029 | dinheiro=44200.0 | clima=Seca Extrema | prontas=1
+W030 | semana=030 | dinheiro=44000.0 | clima=Nublado | prontas=1
+W031 | semana=031 | dinheiro=43800.0 | clima=Chuva | prontas=1
+W032 | semana=032 | dinheiro=43600.0 | clima=Chuva | prontas=1
+W033 | semana=033 | dinheiro=43400.0 | clima=Sol | prontas=1
+W034 | semana=034 | dinheiro=43200.0 | clima=Sol | prontas=1
+W035 | semana=035 | dinheiro=43000.0 | clima=Sol | prontas=1
+W036 | semana=036 | dinheiro=42800.0 | clima=Chuva | prontas=1
+W037 | semana=037 | dinheiro=42600.0 | clima=Seca Extrema | prontas=1
+W038 | semana=038 | dinheiro=42400.0 | clima=Sol | prontas=1
+W039 | semana=039 | dinheiro=42200.0 | clima=Chuva | prontas=1
+W040 | semana=040 | dinheiro=42000.0 | clima=Sol | prontas=1
+W041 | semana=041 | dinheiro=41800.0 | clima=Sol | prontas=1
+W042 | semana=042 | dinheiro=41600.0 | clima=Chuva | prontas=1
+W043 | semana=043 | dinheiro=41400.0 | clima=Nublado | prontas=1
+W044 | semana=044 | dinheiro=41200.0 | clima=Nublado | prontas=1
+W045 | semana=045 | dinheiro=41000.0 | clima=Nublado | prontas=1
+W046 | semana=046 | dinheiro=40800.0 | clima=Chuva | prontas=1
+W047 | semana=047 | dinheiro=40600.0 | clima=Chuva | prontas=1
+W048 | semana=048 | dinheiro=40400.0 | clima=Chuva | prontas=1
+W049 | semana=049 | dinheiro=40200.0 | clima=Sol | prontas=1
+W050 | semana=050 | dinheiro=40000.0 | clima=Nublado | prontas=1
+W051 | semana=051 | dinheiro=39800.0 | clima=Nublado | prontas=1
+W052 | semana=052 | dinheiro=39600.0 | clima=Chuva | prontas=1
 
---- FINAL STATE (resumo) ---
-dia=1120, semana=160
-dinheiro=556515.0358873175
-clima=Chuva
-fazendas=1
-plantacoes_total=10
-multiplicadores_exemplo={'Soja': 0.7583839775683543, 'Tomate': 0.42390723545919173, 'Milho': 0.7301156213054266}
+--- WARNINGS ---
+none
 
-OK: sem erros de invariantes.
+--- FINAL STATE (keys) ---
+_smoke_rng_sample, alertas, clima, dia, dinheiro, emprestimos_ativos, eventos, fazendas, mercado_multiplicadores, meus_equipamentos, nivel, opcoes_base_fazenda, plantacoes_por_fazenda, propriedades_a_venda, rng_seed, salarios_gerente, seguro_agricola_ativo, tipos_de_solo
+
+--- FINAL STATE (subset) ---
+{
+  "dia": 365,
+  "nivel": 1,
+  "dinheiro": 39600.0,
+  "clima": "Chuva"
+}
